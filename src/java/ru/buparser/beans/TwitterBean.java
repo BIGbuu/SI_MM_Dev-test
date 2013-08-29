@@ -1,6 +1,7 @@
 package ru.buparser.beans;
 
 import java.io.Serializable;
+import ru.buparser.util.JsfUtil;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.faces.bean.ManagedBean;
@@ -49,8 +50,11 @@ public class TwitterBean implements Serializable{
         return user;
     }
     public int getfreindsIdsCount() throws TwitterException{
-        freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),100);
+        freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),-1);
         freindsIdsCount = freindsIds.getIDs().length;
+        String str = "["+ String.valueOf(equalsIgnoreCase freindsIds.hasNext()) + "|" String.valueOf(freindsIds.hasPrevious()) +"]";
+        JsfUtil.addSuccessMessage(str);
+//            freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),freindsIds.getNextCursor());
         
         return freindsIdsCount;
     }
