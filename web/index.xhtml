@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        id<h:outputText value="#{twitterBean.user.id}"/><br/>
+        tweets<h:outputText value="#{twitterBean.user.statusesCount}"/><br/>
+        followers<h:outputText value="#{twitterBean.user.followersCount}"/><br/>
+        lastparse<h:outputText value="#{twitterBean.user.followersCount}"/><br/>
+        
+        <p:dataTable id="tweetTable" var="status" value="#{twitterBean.statuses}" editable="true" style="width: 100%">
+            <f:facet name="header">statuses</f:facet>
+            
+            <p:column headerText="id" style="width: 50px">
+                <h:outputText value="#{status.id}"/>
+            </p:column>
+            <p:column headerText="user_id">
+                <h:outputText value="#{status.user.id}"/>
+            </p:column>
+            <p:column headerText="text" >
+                <h:outputText value="#{status.text}"/>
+            </p:column>
+            <p:column headerText="retweet_count">
+                <h:outputText value="#{status.retweetCount}"/>
+            </p:column>
+            <p:column headerText="created_at">
+                <h:outputText value="#{status.createdAt}"/>
+            </p:column>
+        </p:dataTable>
+    </h:body>
+</html>
+
