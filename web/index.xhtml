@@ -11,8 +11,8 @@
     <h:body>
         id<h:outputText value="#{twitterBean.user.id}"/><br/>
         tweets<h:outputText value="#{twitterBean.user.statusesCount}"/><br/>
+        followings<h:outputText value="#{twitterBean.freindsIdsCount}"/><br/>
         followers<h:outputText value="#{twitterBean.user.followersCount}"/><br/>
-        lastparse<h:outputText value="#{twitterBean.user.followersCount}"/><br/>
         
         <p:dataTable id="tweetTable" var="status" value="#{twitterBean.statuses}" editable="true" style="width: 100%">
             <f:facet name="header">statuses</f:facet>

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
+import twitter4j.IDs;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -20,15 +21,12 @@ public class TwitterBean implements Serializable{
     private Twitter twitter;
     private ResponseList<Status> statuses;
     private User user;
+    private IDs freindsIds;
+    private int freindsIdsCount;
+     
     
     public TwitterBean(){
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-/*        cb.setDebugEnabled(true)
-          .setOAuthConsumerKey("Yh9GRSek5AkcdvnCF1KrBQ")
-          .setOAuthConsumerSecret("XzvaRrHdsitHGsoDmuKIDcHIwTiLxvn8t87Wha0VNuA")
-          .setOAuthAccessToken("42683349-TWQZG5AoJN8iwt2mxmqCKa7kJRudPpcy4IW9gScU")
-          .setOAuthAccessTokenSecret("85Szks5ece3a9LAe2Ut2vTaauxeyRUDfjq0qrascAs");
-*/        
+        ConfigurationBuilder cb = new ConfigurationBuilder();     
         cb.setDebugEnabled(true)
           .setOAuthConsumerKey(ResourceBundle.getBundle("/OAuth").getString("consumerKey"))
           .setOAuthConsumerSecret(ResourceBundle.getBundle("/OAuth").getString("consumerSecret"))
@@ -48,7 +46,12 @@ public class TwitterBean implements Serializable{
     
     public User getUser() throws TwitterException{
         user = twitter.showUser(ResourceBundle.getBundle("/Twitter").getString("user"));
-        
         return user;
+    }
+    public int getfreindsIdsCount() throws TwitterException{
+        freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),100);
+        freindsIdsCount = freindsIds.getIDs().length;
+        
+        return freindsIdsCount;
     }
 }
