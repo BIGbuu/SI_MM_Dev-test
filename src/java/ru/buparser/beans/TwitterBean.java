@@ -86,7 +86,6 @@ public class TwitterBean implements Serializable{
         
     }
     private void dbInsertUserInfo() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
-        Class.forName("com.mysql.jdbc.Driver").newInstance();
         String insertUser1 = ""
                  + " INSERT INTO twitterlenta_history (id, date, tweets, followings, followers, parse_time)"
                  + " SELECT id, lastparse, tweets, followings, followers, parse_time FROM twitterlenta WHERE id= ? ";
