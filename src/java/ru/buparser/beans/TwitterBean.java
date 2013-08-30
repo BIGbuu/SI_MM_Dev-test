@@ -2,16 +2,13 @@ package ru.buparser.beans;
 
 import java.io.Serializable;
 import java.sql.*;
+import javax.sql.*;
+import javax.ejb.*;
+import javax.naming.*;
 import java.util.List;
 import java.util.ResourceBundle;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
-import javax.faces.context.FacesContext;
-import javax.persistence.NamedQueries;
-import org.hibernate.Query;
-import ru.buparser.HibernateUtil;
-import org.hibernate.Session;
 import twitter4j.IDs;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
@@ -31,9 +28,10 @@ public class TwitterBean implements Serializable{
     private User user;
     private int freindsIdsCount;
     private long startParseTime;
-     
+    private Context ctx;
+    private DataSource ds; 
     
-    public TwitterBean() throws TwitterException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
+    public TwitterBean() throws TwitterException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NamingException{
         startParseTime = System.currentTimeMillis();
         ConfigurationBuilder cb = new ConfigurationBuilder();     
         cb.setDebugEnabled(Boolean.getBoolean(ResourceBundle.getBundle("/OAuth").getString("debug")))
@@ -48,6 +46,10 @@ public class TwitterBean implements Serializable{
         loadUser();
         loadFriendsIds();
         loadStatuses();
+
+        ctx = new InitialContext();
+        ds = (DataSource)ctx.lookup("twitter");        
+        
         dbInsertUserInfo();
     }
     
@@ -85,27 +87,46 @@ public class TwitterBean implements Serializable{
     }
     private void dbInsertUserInfo() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         Class.forName("com.mysql.jdbc.Driver").newInstance();
-        try (Connection connection = DriverManager.getConnection(ResourceBundle.getBundle("/dbconnect").getString("db"),ResourceBundle.getBundle("/dbconnect").getString("user"),ResourceBundle.getBundle("/dbconnect").getString("password"))) {
-            Statement statement = connection.createStatement();
-            
-            statement.execute(""
+        String insertUser1 = ""
                  + " INSERT INTO twitterlenta_history (id, date, tweets, followings, followers, parse_time)"
-                 + " SELECT id, lastparse, tweets, followings, followers, parse_time FROM twitterlenta WHERE id="+ user.getId() );
-            statement.execute(""
+                 + " SELECT id, lastparse, tweets, followings, followers, parse_time FROM twitterlenta WHERE id= ? ";
+        String insertUser2 = ""
                  + " INSERT INTO twitterlenta (id,tweets,followings,followers,parse_time)"
-                 + " VALUES ("
-                 + user.getId()            + ","
-                 + user.getStatusesCount() + ","
-                 + freindsIdsCount         + ","
-                 + user.getFollowersCount()+ ","
-                 + ((System.currentTimeMillis()-startParseTime)) + ")"
+                 + " VALUES ( ? , ? , ? , ? , ?)"
                  + " ON DUPLICATE KEY UPDATE "
-                 + " tweets="     + user.getStatusesCount()  + ","
-                 + " followings=" + freindsIdsCount          + ","
-                 + " followers="  + user.getFollowersCount() + ","
-                 + " parse_time=" + ((System.currentTimeMillis()-startParseTime))
-            );
-            statement.close();
-        }        
+                 + " tweets    = ? ,"
+                 + " followings= ? ,"
+                 + " followers = ?,"
+                 + " parse_time= ? ";
+
+        Connection conn = null;
+        PreparedStatement pst1 = null;
+        PreparedStatement pst2 = null;
+
+        try {
+            conn = ds.getConnection(ResourceBundle.getBundle("/dbconnect").getString("user"), ResourceBundle.getBundle("/dbconnect").getString("password"));
+            conn.setAutoCommit(false);
+            pst1 = conn.prepareStatement(insertUser1);
+                pst1.setLong(1, user.getId());
+                pst1.executeUpdate();
+            pst2 = conn.prepareStatement(insertUser2);
+                pst2.setLong(1, user.getId());
+                pst2.setInt( 2, user.getStatusesCount());
+                pst2.setInt( 3, freindsIdsCount);
+                pst2.setInt( 4, user.getFollowersCount());
+                pst2.setLong(5, (System.currentTimeMillis()-startParseTime) );
+                pst2.setInt( 6, user.getStatusesCount());
+                pst2.setInt( 7, freindsIdsCount);
+                pst2.setInt( 8, user.getFollowersCount());
+                pst2.setLong(9, (System.currentTimeMillis()-startParseTime) );
+                pst2.executeUpdate();
+                conn.commit();
+                
+        } finally {
+            if (pst1 != null) { pst1.close(); }
+            if (pst2 != null) { pst2.close(); }
+            if (conn != null) { conn.close(); }
+        }
+            
     }
 }
