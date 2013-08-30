@@ -87,24 +87,25 @@ public class TwitterBean implements Serializable{
         Class.forName("com.mysql.jdbc.Driver").newInstance();
         try (Connection connection = DriverManager.getConnection(ResourceBundle.getBundle("/dbconnect").getString("db"),ResourceBundle.getBundle("/dbconnect").getString("user"),ResourceBundle.getBundle("/dbconnect").getString("password"))) {
             Statement statement = connection.createStatement();
- 
-            statement.execute("INSERT INTO twitterlenta (id,tweets,followings,followers,parse_time)"
-                 + "VALUES ("
+            
+            statement.execute(""
+                 + " INSERT INTO twitterlenta_history (id, date, tweets, followings, followers, parse_time)"
+                 + " SELECT id, lastparse, tweets, followings, followers, parse_time FROM twitterlenta WHERE id="+ user.getId() );
+            statement.execute(""
+                 + " INSERT INTO twitterlenta (id,tweets,followings,followers,parse_time)"
+                 + " VALUES ("
                  + user.getId()            + ","
                  + user.getStatusesCount() + ","
                  + freindsIdsCount         + ","
                  + user.getFollowersCount()+ ","
                  + ((System.currentTimeMillis()-startParseTime)) + ")"
                  + " ON DUPLICATE KEY UPDATE "
-                 + "tweets="      + user.getStatusesCount()
-                 + ",followings=" + freindsIdsCount
-                 + ",followers="  + user.getFollowersCount()
-                 + ",parse_time=" + ((System.currentTimeMillis()-startParseTime))
+                 + " tweets="     + user.getStatusesCount()  + ","
+                 + " followings=" + freindsIdsCount          + ","
+                 + " followers="  + user.getFollowersCount() + ","
+                 + " parse_time=" + ((System.currentTimeMillis()-startParseTime))
             );
             statement.close();
-        FacesMessage msg = new FacesMessage("User info add", String.valueOf(user.getId()));
-        FacesContext.getCurrentInstance().addMessage(null, msg);
-            
         }        
     }
 }
