@@ -21,7 +21,6 @@ public class TwitterBean implements Serializable{
     private Twitter twitter;
     private ResponseList<Status> statuses;
     private User user;
-    private IDs freindsIds;
     private int freindsIdsCount;
      
     
@@ -48,12 +47,17 @@ public class TwitterBean implements Serializable{
         user = twitter.showUser(ResourceBundle.getBundle("/Twitter").getString("user"));
         return user;
     }
-    public int getfreindsIdsCount() throws TwitterException{
-        freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),-1);
-        freindsIdsCount = freindsIds.getIDs().length;
-//        String str = "["+ String.valueOf(equalsIgnoreCase freindsIds.hasNext()) + "|" String.valueOf(freindsIds.hasPrevious()) +"]";
-//            freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),freindsIds.getNextCursor());
+    public int getFreindsIdsCount() throws TwitterException{
+        long cursor = -1;
+        IDs freindsIds;
+
+        freindsIdsCount=0;
+        do {
+            freindsIds = twitter.getFriendsIDs(ResourceBundle.getBundle("/Twitter").getString("user"),cursor);
+            freindsIdsCount += freindsIds.getIDs().length;
+        }while ( (cursor = freindsIds.getNextCursor()) !=0 );
         
         return freindsIdsCount;
     }
+    public void 
 }
