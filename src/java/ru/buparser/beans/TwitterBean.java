@@ -33,7 +33,7 @@ public class TwitterBean implements Serializable{
     private long startParseTime;
      
     
-    public TwitterBean() throws TwitterException{
+    public TwitterBean() throws TwitterException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException{
         startParseTime = System.currentTimeMillis();
         ConfigurationBuilder cb = new ConfigurationBuilder();     
         cb.setDebugEnabled(Boolean.getBoolean(ResourceBundle.getBundle("/OAuth").getString("debug")))
@@ -48,7 +48,7 @@ public class TwitterBean implements Serializable{
         loadUser();
         loadFriendsIds();
         loadStatuses();
-        
+        dbInsertUserInfo();
     }
     
     public List<Status> getStatuses() throws TwitterException{
