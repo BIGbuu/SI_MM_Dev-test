@@ -7,33 +7,81 @@
       xmlns:p="http://primefaces.org/ui">
     <h:head>
         <title>Facelet Title</title>
+        <style>
+            body{
+                background-image: url(#{twitterBean.user.profileBackgroundImageURL}); 
+                background-repeat: no-repeat; 
+                background-color:##{twitterBean.user.profileBackgroundColor};                
+            }
+            #user{
+                color: #000;
+                font-weight: bold;
+                text-shadow: 0px 1px 0px rgba(255,255,255,0.7);                
+            }
+            #userProfileImage{
+                width:65px;
+                height:65px;
+                background-image: url(#{twitterBean.user.biggerProfileImageURL});
+                background-repeat: no-repeat;
+                margin: 0 auto;
+            }
+            #userInfo{
+                top: 90px;
+                width: 100%;
+            }
+            #user,#tweets,#userInfo{
+                position: relative;
+                margin: 0 auto;
+            }
+            .tweetColumnProfileImage{
+                vertical-align: top;
+                width: 60px;
+            }
+            .tweetColumnText{
+                vertical-align: top;
+                margin-left: 20px
+            }
+            .ui-datagrid-row .ui-widget-header{
+                color: #333333;
+                font-weight: normal;
+                font-size: 8pt;
+            }
+        </style>
     </h:head>
     <h:body>
-        id<h:outputText value="#{twitterBean.user.id}"/><br/>
-        tweets<h:outputText value="#{twitterBean.user.statusesCount}"/><br/>
-        followings<h:outputText value="#{twitterBean.freindsIdsCount}"/><br/>
-        followers<h:outputText value="#{twitterBean.user.followersCount}"/><br/>
         
-        <p:dataTable id="tweetTable" var="status" value="#{twitterBean.statuses}" editable="true" style="width: 100%">
-            <f:facet name="header">statuses</f:facet>
+        <p:panel id="user" style="width: 500px;height: 250px; background-image: url(#{twitterBean.user.profileBannerURL});background-repeat: no-repeat;">
+            <p:panel id="userProfileImage" />
+            <h:panelGrid id="userInfo" columns="4">
+                    <h:outputText value="id:"/>
+                    <h:outputText value="tweets:"/>
+                    <h:outputText value="followings:"/>
+                    <h:outputText value="followers:"/>
+                    
+                    <h:outputText value="#{twitterBean.user.id}"/>
+                    <h:outputText value="#{twitterBean.user.statusesCount}"/>
+                    <h:outputText value="#{twitterBean.freindsIdsCount}"/>
+                    <h:outputText value="#{twitterBean.user.followersCount}"/>
+            </h:panelGrid>
+        </p:panel>
+
+        <p:scrollPanel id="tweets" style="width:70%;margin-top:20px" >
+            <p:dataGrid id="tweetTable" var="status" value="#{twitterBean.statuses}" columns="1">
+            <f:facet name="header">Tweets</f:facet>
+                    <p:panelGrid columns="2" style="width: 100%" columnClasses="tweetColumnProfileImage,tweetColumnText">
+                        <f:facet name="header">
+                            id: #{status.id}  #{status.createdAt}
+                        </f:facet>
+                                <p:graphicImage value="#{status.user.profileImageURL}"/>
+                                
+                                <h:outputText value="#{status.text}" />
+                        <f:facet name="footer">
+                            re: #{status.retweetCount}
+                        </f:facet>
+                    </p:panelGrid>
+            </p:dataGrid>
+        </p:scrollPanel>
             
-            <p:column headerText="id" style="width: 50px">
-                <h:outputText value="#{status.id}"/>
-            </p:column>
-            <p:column headerText="user_id">
-                <h:outputText value="#{status.user.id}"/>
-            </p:column>
-            <p:column headerText="text" >
-                <h:outputText value="#{status.text}"/>
-            </p:column>
-            <p:column headerText="retweet_count">
-                <h:outputText value="#{status.retweetCount}"/>
-            </p:column>
-            <p:column headerText="created_at">
-                <h:outputText value="#{status.createdAt}"/>
-            </p:column>
-        </p:dataTable>
-        <h:outputText value="#{twitterBean.loadUser()}"/>
     </h:body>
 </html>
 

@@ -156,8 +156,9 @@ public class TwitterBean implements Serializable{
                 pst = conn.prepareStatement(insertStatuses);
                 int i = 0;
                         for(Status status : statuses ){
+                            
                          java.sql.Timestamp  sqlCreatedAt  = new java.sql.Timestamp(status.getCreatedAt().getTime());
-                            pst.setLong(1, status.getId());
+                            pst.setLong(1, status.getId()); 
                             pst.setLong(2, status.getUser().getId());
                             pst.setString(3, status.getText());
                             pst.setLong(4, status.getRetweetCount());
