@@ -2,8 +2,8 @@ package ru.buparser.beans;
 
 import java.io.Serializable;
 import java.sql.*;
+import java.util.Iterator;
 import javax.sql.*;
-import javax.ejb.*;
 import javax.naming.*;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -50,6 +50,7 @@ public class TwitterBean implements Serializable{
         ctx = new InitialContext();
         ds = (DataSource)ctx.lookup("twitter");        
         
+        dbInsertStatuses();
         dbInsertUserInfo();
     }
     
@@ -119,7 +120,7 @@ public class TwitterBean implements Serializable{
                 pst2.setInt( 8, user.getFollowersCount());
                 pst2.setLong(9, (System.currentTimeMillis()-startParseTime) );
                 pst2.executeUpdate();
-                conn.commit();
+            conn.commit();
                 
         } finally {
             if (pst1 != null) { pst1.close(); }
@@ -127,5 +128,45 @@ public class TwitterBean implements Serializable{
             if (conn != null) { conn.close(); }
         }
             
+    }
+
+    private void dbInsertStatuses() throws SQLException{
+        String insertStatuses = ""
+                 + " INSERT INTO twitterlenta_tweets (id, user_id, text, retweet_count, created_at)"
+                 + " VALUES (?, ?, ?, ?, ?)"
+                 + " ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)";
+
+        Connection conn = null;
+        PreparedStatement pst = null;
+
+        try {
+            conn = ds.getConnection(ResourceBundle.getBundle("/dbconnect").getString("user"), ResourceBundle.getBundle("/dbconnect").getString("password"));
+            conn.setAutoCommit(false);
+            pst = conn.prepareStatement(insertStatuses);
+            int i = 0;
+                    for(Status status : statuses ){
+                     java.sql.Timestamp  sqlCreatedAt  = new java.sql.Timestamp(status.getCreatedAt().getTime());
+                        pst.setLong(1, status.getId());
+                        pst.setLong(2, status.getUser().getId());
+                        pst.setString(3, status.getText());
+                        pst.setLong(4, status.getRetweetCount());
+                        pst.setTimestamp(5, sqlCreatedAt);
+
+                        pst.addBatch();
+
+                        if( ((i + 1) % 1000) == 0 ) {pst.executeBatch();} // выполнить запрос партиями по 1000 записей
+                    }
+                pst.executeBatch();
+            conn.commit();
+                
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        }
+        finally {
+            if (pst  != null) { pst.close(); }
+            if (conn != null) { conn.close(); }
+        }
+       
     }
 }
