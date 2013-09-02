@@ -72,8 +72,13 @@ public class TwitterBean implements Serializable{
         
     }
     private void loadStatuses() throws TwitterException{
-        statuses = twitter.getUserTimeline(ResourceBundle.getBundle("/Twitter").getString("user"), new Paging(1, 25));
-        
+        int tweetsCountPerPage = Integer.parseInt(ResourceBundle.getBundle("/Twitter").getString("tweetsCountPerPage"));
+        int pageCount = Integer.parseInt(ResourceBundle.getBundle("/Twitter").getString("pageCount"));
+        Paging paging;
+        for(int page = 1; page<= pageCount; page++) {
+            paging = new Paging(page,tweetsCountPerPage);
+            statuses = twitter.getUserTimeline( ResourceBundle.getBundle("/Twitter").getString("user"), paging ) ;
+        }
     }
     private void loadFriendsIds() throws TwitterException{
         long cursor = -1;
